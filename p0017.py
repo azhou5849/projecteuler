@@ -1,3 +1,5 @@
+import math
+
 def letter_count(n):
     """Counts the number of letters when a positive integer n <= 1000 is written out in words
     The spelling is based on British English, which means that 'and' is part of the spelling"""
