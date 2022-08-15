@@ -35,16 +35,16 @@ class Date:
 
     def advance_month(self):
         # first deal with day of day of week
-        if month == 2:
+        if self.month == 2:
             self.day_of_week = (self.day_of_week + (29 if is_leap_year(self.year) else 28)) % 7
-        elif month in [1, 3, 5, 7, 8, 10, 12]:
+        elif self.month in [1, 3, 5, 7, 8, 10, 12]:
             self.day_of_week = (self.day_of_week + 31) % 7
         else:
             self.day_of_week = (self.day_of_week + 30) % 7
 
         # month and year
-        if month == 12:
-            self.month == 1
+        if self.month == 12:
+            self.month = 1
             self.year += 1
         else:
             self.month += 1
