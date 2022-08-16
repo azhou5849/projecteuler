@@ -1,6 +1,6 @@
 """
 In f(n) = n^2 + an + b, when |b| != 1, we know that f(kd) is divisible by d, where d is any divisor of b and k >= 1
-When |b| = 0 or |b| = 1, we get f(0) = b is not prime, so this certainly does not pan out
+When b < 2, we get f(0) = b is not prime, so this certainly does not pan out
 
 Otherwise, note that f(p), f(2p), f(3p) are all divisible by p, where p is the minimal prime divisor of b
 The only way these can be prime is if they are equal to p, but since f is quadratic, only two of them can be equal to p
@@ -25,6 +25,26 @@ for n in range(7000000):
             is_prime[m * n] = False
 prime_list = [n for n in range(7000000) if is_prime[n]]
 
+def in_sorted(sorted_list, item):
+    """
+    Implements binary search to test whether the number item is in sorted_list
+    """
+    if len(sorted_list) == 0:
+        return False
+    midpoint = len(sorted_list) // 2
+    if sorted_list[midpoint] == item:
+        return True
+    else:
+        if len(sorted_list) == 1:
+            return False
+        elif sorted_list[midpoint] < item:
+            if len(sorted_list) == 2:
+                return False
+            else:
+                return in_sorted(sorted_list[midpoint + 1 : ], item)
+        else:
+            return in_sorted(sorted_list[:midpoint], item)
+
 def min_prime(n):
     """
     Get the minimum prime divisor of an integer n > 2
@@ -36,4 +56,22 @@ def min_prime(n):
         i += 1
     return n
 
-min_prime(79)
+most_primes = 0
+best_tuple = (0,0)  # (a,b)
+for b in range(2, 1001):
+    if 2 * min_prime(b) < most_primes: # no chance of beating best record, by above
+        continue
+    for a in range(-999, 1000):
+        if 2 * min_prime(b) == most_primes: # best possible value for given b
+            break
+        def f(n):
+            return (n ** 2) + (a * n) + b
+        n = 0
+        while in_sorted(prime_list, f(n)):
+            n += 1
+        if n > most_primes:
+            most_primes = n
+            best_tuple = (a, b)
+
+print(most_primes)
+print(best_tuple)
