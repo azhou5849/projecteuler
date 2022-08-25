@@ -18,7 +18,14 @@ def digits(n):
     else:
         return digits(n // 10) + [n % 10]
 
-def list_overlap(l_1, l_2):
+def has_duplicate(lst):
+    lst.sort()
+    for i in range(len(lst) - 1):
+        if lst[i] == lst[i + 1]:
+            return True
+    return False
+
+def list_overlap(l_1, l_2):  # in this case the lists are quite short, but the time complexity could be improved by sorting first
     for x in l_1:
         if x in l_2:
             return True
@@ -26,12 +33,26 @@ def list_overlap(l_1, l_2):
 
 pandigital_products = []
 for a in range(2,9):
-    for b in range(1234, 9999 // a):
+    for b in range(1234, 9999 // a + 1):
         digits_b = digits(b)
-        if list_overlap([0,a], digits_b):
+        if has_duplicate(digits_b) or list_overlap([0,a], digits_b):
             continue
         digits_p = digits(a * b)
-        if list_overlap([0,a] + digits_b, digits_p):
+        if has_duplicate(digits_p) or list_overlap([0,a] + digits_b, digits_p):
             continue
         pandigital_products.append(a * b)
-print(pandigital_products)
+for a in range(12,99):
+    digits_a = digits(a)
+    if has_duplicate(digits_a) or list_overlap([0], digits_a):
+        continue
+    for b in range(123, 9999 // a + 1):
+        digits_b = digits(b)
+        if has_duplicate(digits_b) or list_overlap([0] + digits_a, digits_b):
+            continue
+        digits_p = digits(a * b)
+        if has_duplicate(digits_p) or list_overlap([0] + digits_a + digits_b, digits_p):
+            continue
+        if a * b not in pandigital_products:
+            pandigital_products.append(a * b)
+
+print(sum(pandigital_products))
