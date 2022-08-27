@@ -19,12 +19,14 @@ Substituting 6c - 1 = k(m^2 + n^2) and 6d - 1 = k(m^2 - n^2 + 2mn) gives us
     (6b - 1)^2 + k^2(m^2 + n^2)^2 = k^2(m^2 - n^2 + 2mn)^2 + 1
     (6b - 1)^2 = k^2(m^4 + n^4 + 4m^2n^2 + 4m^3n - 2m^2n^2 - 4mn^3) - k^2(m^4 + n^4 + 2m^2n^2) + 1
     (6b - 1)^2 = 4k^2mn(m^2 - n^2) + 1
-
 """
 import math
 #import timeit
-
 #start = timeit.default_timer()
+
+r = 1 + math.sqrt(2)
+def pent(n):
+    return n * (3 * n - 1) // 2
 
 class Point:
     def __init__(self, x = 0, y = 0, z = 0):
@@ -32,13 +34,8 @@ class Point:
         self.y = y
         self.z = z
 
-    def step(self):
-        if self.x == 0 and self.y == 0:
-            self.x, self.z = self.z + 1, 0
-        elif self.y == 0:
-            self.x, self.y, self.z = self.x - 1, self.z + 1, 0
-        else:
-            self.y, self.z = self.y - 1, self.z + 1
+    def neighbors(self):
+        return [Point(self.x + 1, self.y, self.z), Point(self.x, self.y + 1, self.z), Point(self.x, self.y, self.z + 1)]
 
     def convert(self):
         """
@@ -46,26 +43,40 @@ class Point:
         """
         return (6 * self.x + 1, (3 * self.z + 2) // 2 + 6 * self.y + 3, (3 * self.z + 2) // 2)
 
-def pent(n):
-    return n * (3 * n - 1) // 2
-
-r = 1 + math.sqrt(2)
+    def a_value(self):
+        k, m, n = 6 * self.x + 1, (3 * self.z + 2) // 2 + 6 * self.y + 3, (3 * self.z + 2) // 2
+        return (k * (2 * m * n - m**2 + n**2) + 1) // 6
 
 done = False
-best = math.inf
-counter = Point()
+to_try = [Point(0,0,0)]
 while not done:
-    k, m, n = counter.convert()
-    if m > r * n or math.gcd(m,n) > 1:
-        counter.step()
-    else:
+    print(to_try)
+    pt = to_try[0]
+    k, m, n = pt.convert()
+    if m < r * n and math.gcd(m,n) == 1:
         big = 4 * (k**2) * m * n * (m**2 - n**2) + 1
         test = math.isqrt(big)
         if test**2 == big and test % 6 == 5:
-            best = (k * (2 * m * n - m**2 + n**2) + 1) // 6
+            print(pent(pt.a_value()))
             done = True
-        counter.step()
-print(pent(best))
+    to_try = sorted(to_try[1:] + pt.neighbors(), key = lambda p : p.a_value())
+
+
+#counter = Point()
+#while not done:
+#    k, m, n = counter.convert()
+#    if m > r * n or math.gcd(m,n) > 1:
+#        counter.step()
+#    else:
+#        big = 4 * (k**2) * m * n * (m**2 - n**2) + 1
+#        test = math.isqrt(big)
+#        if test**2 == big and test % 6 == 5:
+#            candidate = (k * (2 * m * n - m**2 + n**2) + 1) // 6
+#            if candidate < best:
+#                best = candidate
+#            done = True
+#        counter.step()
+#print(pent(best))
 
 #stop = timeit.default_timer()
 #print('Time: ', stop - start)
