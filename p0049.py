@@ -14,4 +14,22 @@ for n in range(2, 10000):
             m += n
 primes_4 = [n for n in range(1000, 10000) if is_prime[n]]
 
-print(primes_4)
+def is_permutation(m,n):
+    """
+    Checks if the digits of m are a permutation of the digits of n
+    """
+    m_digits = [int(c) for c in str(m)]
+    n_digits = [int(c) for c in str(n)]
+    return sorted(m_digits) == sorted(n_digits)
+
+for i in range(len(primes_4) - 1):
+    p = primes_4[i]
+    for j in range(i + 1, len(primes_4)):
+        q = primes_4[j]
+        n = 2 * q - p
+        if n >= 10000:
+            continue
+        else:
+            if is_prime[n]:
+                if is_permutation(p,q) and is_permutation(p,n):
+                    print(str(p) + str(q) + str(n))
