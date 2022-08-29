@@ -67,55 +67,74 @@ class Hand:
 
     def add_card(self, card):
         self.card_list.append(card)
-        self.card_list.sort(reverse = True)
+
+    def is_flush(self):
+        if len(self.card_list) != 5:
+            return False
+        for c in self.card_list:
+            if c.suit != self.card_list[0].suit:
+                return False
+        return True
 
     def evaluate(self):
         if len(self.card_list) != 5:
             raise Exception("Something went wrong")
-        ranks = [c.rank for c in self.card_list]  # this should already be sorted from top to bottom
-        is_flush = True
+        ranks = {}
+        max_rank, min_rank = 0, 14
         for c in self.card_list:
-            if c.suit != c[0].suit:
-                is_flush = False
-                break
-        if is_flush:
-            if ranks[0] - ranks[4] == 4:
-                if ranks[0] == 14:
-                    self.type = "Royal Flush"
-                else:
-                    self.type = "Straight Flush"
-                    self.tiebreak = ranks[0]
-            else:
-                self.type = "Flush"
-                self.tiebreak = ranks
+            ranks[c.rank] = ranks.get(c.rank, 0) + 1
+            if c.rank > max_rank:
+                max_rank = c.rank
+            if c.rank < min_rank:
+                min_rank = c.rank
+        rank_dist = sorted(list(ranks.values()), reverse = True)
+        if rank_dist == [4,1]:
+            self.type = "Four of a Kind"
+        elif rank_dist == [3,2]:
+            self.type = "Full House"
+        elif rank_dist == [3,1,1]:
+            self.type = "Three of a Kind"
+        elif rank_dist == [2,2,1]:
+            self.type = "Two Pairs"
+        elif rank_dist == [2,1,1,1]:
+            self.type = "One Pair"
         else:
-            rank_counts = {}
-            for r in ranks:
-                rank_counts[r] = rank_counts.get(r, 0) + 1
-            rank_dist = sorted(rank_counts.items(), reverse = True)
-            if rank_dist == [4,1]:
-                self.type = "Four of a Kind"
-            elif rank_dist == [3,2]:
-                self.type = "Full House"
-            elif rank_dist == [3,1,1]:
-                self.type = "Three of a Kind"
-            elif rank_dist == [2,2,1]:
-                self.type = "Two Pairs"
-            elif rank_dist == [2,1,1,1]:
-                self.type = "One Pair"
+            if self.is_flush():
+                if max_rank - min_rank == 4:
+                    if max_rank == 14:
+                        self.type = "Royal Flush"
+                    else:
+                        self.type = "Straight Flush"
+                else:
+                    self.type = "Flush"
             else:
-                if ranks[0] - ranks[4] == 4:
+                if max_rank - min_rank == 4:
                     self.type = "Straight"
                 else:
                     self.type = "High Card"
-            self.tiebreak = sorted(rank_counts.keys(), key = (lambda k : (rank_dist[k], k)), reverse = True)
+        self.tiebreak = sorted(list(ranks.keys()), key = (lambda k : (ranks[k], k)), reverse = True)
+
+    def __gt__(self, other):
+        self.evaluate()
+        other.evaluate()
+        if type_order.index(self.type) > type_order.index(other.type):
+            return True
+        elif type_order.index(self.type) < type_order.index(other.type):
+            return False
+        else:
+            for i in range(len(self.tiebreak)):
+                if self.tiebreak[i] > other.tiebreak[i]:
+                    return True
+                elif self.tiebreak[i] < other.tiebreak[i]:
+                    return False
+            return False
 
     @classmethod
     def read_hands(cls, line):
         """
         Returns a Hand pair read from a line of the file
         """
-        card_strs = line.split()
+        card_strs = line.strip().split()
         first_hand, second_hand = Hand([]), Hand([])
         for i in range(10):
             if i < 5:
@@ -124,6 +143,16 @@ class Hand:
                 second_hand.add_card(Card(card_strs[i]))
         return first_hand, second_hand
 
+count = 0
 with open("p0054poker.txt", 'r') as f:
-    line = f.readline()
-    first_hand, second_hand = Hand.read_hands(line)
+#    stop = 0
+    for line in f:
+        first_hand, second_hand = Hand.read_hands(line)
+        if first_hand > second_hand:
+#            print(line)
+            count += 1
+#        if stop > 10:
+#            break
+#        else:
+#            stop += 1
+print(count)
