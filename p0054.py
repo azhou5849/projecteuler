@@ -67,19 +67,20 @@ class Hand:
 
     def add_card(self, card):
         self.card_list.append(card)
-        self.card_list.sort()
+        self.card_list.sort(reverse = True)
 
     def evaluate(self):
         if len(self.card_list) != 5:
             raise Exception("Something went wrong")
+        ranks = [c.rank for c in self.card_list]  # this should already be sorted from top to bottom
         is_flush = True
         for c in self.card_list:
             if c.suit != c[0].suit:
                 is_flush = False
+                break
         if is_flush:
-            ranks = [c.rank for c in self.card_list]  # this should already be sorted
-            if ranks[4] - ranks[0] == 4:
-                if ranks[0] == 10:
+            if ranks[0] - ranks[4] == 4:
+                if ranks[0] == 14:
                     self.type = "Royal Flush"
                 else:
                     self.type = "Straight Flush"
@@ -88,19 +89,26 @@ class Hand:
                 self.type = "Flush"
                 self.tiebreak = ranks
         else:
-            unique_ranks = []
-            for c in self.card_list:
-                if c.rank not in unique_ranks:
-                    unique_ranks.append(c.rank)  # this should already be sorted from top to bottom
-            if len(unique_ranks) == 2:  # split is either 4-1 or 3-2
-                if unique_ranks[0] < unique_ranks[1] or unique_ranks[3] < unique_ranks[4]:
-                    self.type = "Four of a Kind"
+            rank_counts = {}
+            for r in ranks:
+                rank_counts[r] = rank_counts.get(r, 0) + 1
+            rank_dist = sorted(rank_counts.items(), reverse = True)
+            if rank_dist == [4,1]:
+                self.type = "Four of a Kind"
+            elif rank_dist == [3,2]:
+                self.type = "Full House"
+            elif rank_dist == [3,1,1]:
+                self.type = "Three of a Kind"
+            elif rank_dist == [2,2,1]:
+                self.type = "Two Pairs"
+            elif rank_dist == [2,1,1,1]:
+                self.type = "One Pair"
+            else:
+                if ranks[0] - ranks[4] == 4:
+                    self.type = "Straight"
                 else:
-                    self.type = "Full House"
-            elif len(unique_ranks) == 3:
-                if
-
-
+                    self.type = "High Card"
+            self.tiebreak = sorted(rank_counts.keys(), key = (lambda k : (rank_dist[k], k)), reverse = True)
 
     @classmethod
     def read_hands(cls, line):
