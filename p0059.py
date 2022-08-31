@@ -12,3 +12,30 @@ Your task has been made easy, as the encryption key consists of three lower case
 Using p059_cipher.txt (right click and 'Save Link/Target As...'), a file containing the encrypted ASCII codes, and the knowledge that the plain text must contain common English words,
 decrypt the message and find the sum of the ASCII values in the original text.
 """
+def ascii_bin_str(n):
+    """
+    Creates a string of 8 bits corresponding to the integer 0 <= n <= 255 (representing a character via ASCII)
+    """
+    left = n
+    output = ''
+    for _ in range(8):
+        output = str(left % 2) + output
+        left = left // 2
+    return output
+
+def xor_bin_str(b1, b2):
+    """
+    Performs bitwise XOR on two 8-bit strings
+    """
+    output = ''
+    for i in range(8):
+        if b1[i] == b2[i]:
+            output += '0'
+        else:
+            output += '1'
+    return output
+
+ascii_freq = {}
+with open("p0059cipher.txt", 'r') as f:
+    ascii = [int(ascii) for ascii in f.readline().strip().split(',')]
+print(ascii[:10])
