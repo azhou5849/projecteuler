@@ -13,40 +13,72 @@ Using p0059cipher.txt, a file containing the encrypted ASCII codes,
 and the knowledge that the plain text must contain common English words,
 decrypt the message and find the sum of the ASCII values in the original text.
 """
-def ascii_bin_list(n):
-    """
-    Creates a list of 8 bits corresponding to the integer 0 <= n <= 255 (representing a character via ASCII)
-    Least significant bit comes first
-    """
-    left = n
-    output = []
-    for _ in range(8):
-        output.append(left % 2)
-        left = left // 2
-    return output
+from enchant.checker import SpellChecker
+chkr = SpellChecker("en_US")
 
-def bin_list_ascii(lst):
-    """
-    Inverts the previous function
-    """
-    return sum(lst[i] * (2**i) for i in range(8))
-
-def xor_bin_list(b1, b2):
-    """
-    Performs bitwise XOR on two 8-bit strings
-    """
-    return [(t[0] + t[1]) % 2 for t in zip(b1,b2)]
+valid_chars = list(range(32,60)) + list(range(65,91)) + list(range(97,123)) + [63,91,93]  # add characters as needed until stuff shows up
 
 with open("p0059cipher.txt", 'r') as f:
-    encoded = [ascii_bin_list(int(ascii)) for ascii in f.readline().strip().split(',')]
+    encoded = [int(ascii) for ascii in f.readline().strip().split(',')]
 
-# first character should come from a capital letter
-key_possible_firsts = []
-for capital in range(65, 91):
-    first_character_candidate = bin_list_ascii(xor_bin_list(encoded[0], ascii_bin_list(capital)))
-    if first_character_candidate >= 97 and first_character_candidate <= 122:
-        key_possible_firsts.append(first_character_candidate)
-key_possible_firsts.sort()
+allowed_firsts = []
+for a in range(97,123):
+    candidate = True
+    i = 0
+    while i < len(encoded):
+        char = a ^ encoded[i]
+        if char not in valid_chars:
+            candidate = False
+            #print(char,chr(char))
+            break
+        i += 3
+    if candidate:
+        allowed_firsts.append(a)
+#print(allowed_firsts)
 
+allowed_seconds = []
+for b in range(97,123):
+    candidate = True
+    i = 1
+    while i < len(encoded):
+        char = b ^ encoded[i]
+        if char not in valid_chars:
+            candidate = False
+            #print(char,chr(char))
+            break
+        i += 3
+    if candidate:
+        allowed_seconds.append(b)
+#print(allowed_seconds)
 
-print(key_possible_firsts[:10])
+allowed_thirds = []
+for c in range(97,123):
+    candidate = True
+    i = 2
+    while i < len(encoded):
+        char = c ^ encoded[i]
+        if char not in valid_chars:
+            candidate = False
+            #print(char,chr(char))
+            break
+        i += 3
+    if candidate:
+        allowed_thirds.append(c)
+#print(allowed_thirds)
+
+for a in allowed_firsts:
+    for b in allowed_seconds:
+        for c in allowed_thirds:
+            decoded_message = ""
+            ascii_sum = 0
+            for i in range(len(encoded)):
+                if i % 3 == 0:
+                    decoded_char = a ^ encoded[i]
+                elif i % 3 == 1:
+                    decoded_char = b ^ encoded[i]
+                else:
+                    decoded_char = c ^ encoded[i]
+                decoded_message += chr(decoded_char)
+                ascii_sum += decoded_char
+            print(decoded_message)
+            print(ascii_sum)
