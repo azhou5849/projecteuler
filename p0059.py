@@ -9,33 +9,44 @@ Unfortunately, this method is impractical for most users, so the modified method
 If the password is shorter than the message, which is likely, the key is repeated cyclically throughout the message.
 The balance for this method is using a sufficiently long password key for security, but short enough to be memorable.
 Your task has been made easy, as the encryption key consists of three lower case characters.
-Using p059_cipher.txt (right click and 'Save Link/Target As...'), a file containing the encrypted ASCII codes, and the knowledge that the plain text must contain common English words,
+Using p0059cipher.txt, a file containing the encrypted ASCII codes,
+and the knowledge that the plain text must contain common English words,
 decrypt the message and find the sum of the ASCII values in the original text.
 """
-def ascii_bin_str(n):
+def ascii_bin_list(n):
     """
-    Creates a string of 8 bits corresponding to the integer 0 <= n <= 255 (representing a character via ASCII)
+    Creates a list of 8 bits corresponding to the integer 0 <= n <= 255 (representing a character via ASCII)
+    Least significant bit comes first
     """
     left = n
-    output = ''
+    output = []
     for _ in range(8):
-        output = str(left % 2) + output
+        output.append(left % 2)
         left = left // 2
     return output
 
-def xor_bin_str(b1, b2):
+def bin_list_ascii(lst):
+    """
+    Inverts the previous function
+    """
+    return sum(lst[i] * (2**i) for i in range(8))
+
+def xor_bin_list(b1, b2):
     """
     Performs bitwise XOR on two 8-bit strings
     """
-    output = ''
-    for i in range(8):
-        if b1[i] == b2[i]:
-            output += '0'
-        else:
-            output += '1'
-    return output
+    return [(t[0] + t[1]) % 2 for t in zip(b1,b2)]
 
-ascii_freq = {}
 with open("p0059cipher.txt", 'r') as f:
-    ascii = [int(ascii) for ascii in f.readline().strip().split(',')]
-print(ascii[:10])
+    encoded = [ascii_bin_list(int(ascii)) for ascii in f.readline().strip().split(',')]
+
+# first character should come from a capital letter
+key_possible_firsts = []
+for capital in range(65, 91):
+    first_character_candidate = bin_list_ascii(xor_bin_list(encoded[0], ascii_bin_list(capital)))
+    if first_character_candidate >= 97 and first_character_candidate <= 122:
+        key_possible_firsts.append(first_character_candidate)
+key_possible_firsts.sort()
+
+
+print(key_possible_firsts[:10])
