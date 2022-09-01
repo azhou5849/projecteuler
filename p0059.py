@@ -13,9 +13,6 @@ Using p0059cipher.txt, a file containing the encrypted ASCII codes,
 and the knowledge that the plain text must contain common English words,
 decrypt the message and find the sum of the ASCII values in the original text.
 """
-from enchant.checker import SpellChecker
-chkr = SpellChecker("en_US")
-
 valid_chars = list(range(32,60)) + list(range(65,91)) + list(range(97,123)) + [63,91,93]  # add characters as needed until stuff shows up
 
 with open("p0059cipher.txt", 'r') as f:
